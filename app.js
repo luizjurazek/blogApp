@@ -2,9 +2,10 @@
 const express = require('express');
 const handlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
-// const mongoose = require('mongoose');
 const app = express();
 const admin = require('./routes/admin');
+const path = require("path");
+// const mongoose = require('mongoose');
 
 
 // Configurações do app
@@ -19,10 +20,13 @@ const admin = require('./routes/admin');
     // Mongoose
 
 
+    // Public 
+    app.use(express.static(path.join(__dirname, "public")));
+
 // Rotas
     //home
     app.get('/', (req, res) => {
-        res.send("Home");
+        res.render("admin/index");
     })
     //admin
     app.use('/admin', admin);
