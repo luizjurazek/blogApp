@@ -5,8 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const admin = require('./routes/admin');
 const path = require("path");
-// const mongoose = require('mongoose');
-
+const mongoose = require('mongoose');
 
 // Configurações do app
     // Body Parser
@@ -18,6 +17,13 @@ const path = require("path");
     app.set('view engine', 'handlebars');
 
     // Mongoose
+        // mongoose.Promise = global.Promise; legado, não usar
+        mongoose.set('strictQuery', true); // Removendo warning 
+        mongoose.connect("mongodb://127.0.0.1/blogapp").then(() => {
+            console.log("Conectado ao mongo");
+        }).catch((err) => {
+            console.log("Erro ao se conectar: " + err);
+        });
 
 
     // Public 
