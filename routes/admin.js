@@ -3,6 +3,8 @@ const router = express.Router();
 const mongoose = require("mongoose");
 require("../models/Categoria");
 const Categoria = mongoose.model("categorias");
+require("../models/Postagem");
+const Postagem = mongoose.model("postagens");
 
 router.get('/', (req, res) => {
     res.send("Página principal do painel ADM");
@@ -40,8 +42,10 @@ router.post("/categorias/edit", (req, res) => {
         categoria.nome = req.body.nome;
         categoria.slug = req.body.slug;
 
+        // Criar validação
+
         categoria.save().then(() => {
-            res.flash("success_msg", "Categoria editada com sucesso!");
+            req.flash("success_msg", "Categoria editada com sucesso!");
             res.redirect("/admin/categorias");
         }).catch((err) => {
             req.flash("error_msg", "Houve um erro interno ao salvar a edição da categoria!");
@@ -53,6 +57,18 @@ router.post("/categorias/edit", (req, res) => {
         req.redirect("/admin/categorias");
     });
 });
+
+router.post("/categorias/deletar", (req, res) => {
+    Categoria.remove({_id: req.body.id}).then(() => {
+        req.flash("success_msg", "Categoria deletada com sucesso!");
+        res.redirect("/admin/categorias");
+    }).catch((err) => {
+        req.flash("error_msg", "Houver um erro ao deletar categoria!");
+        res.redirect("/admin/categorias");
+    });
+});
+
+
 
 router.post("/categorias/nova", (req, res) => {
     var erros = [];
@@ -84,6 +100,70 @@ router.post("/categorias/nova", (req, res) => {
             res.redirect("/admin");
         })
     };    
+});
+
+
+router.get('/postagens', (req, res) => {
+    Postagem.find().lean().populate('categorias').sort({data: "desc"}).then((postagens) => { // Resolver problema nao lista
+        res.render("admin/postagens", {postagens: postagens})
+    })
+    .catch((err) => {
+        req.flash("error_msg", "Houve um erro ao listar as postagens!");
+        res.redirect("/admin")
+    })
+    
+})
+
+// router.get('/categorias', (req, res) => {
+//     Categoria.find().lean().sort({date: 'desc'}).then((categorias) => {
+//         res.render("admin/categorias", {categorias: categorias});
+//     }).catch((err) => {
+//         req.flash("error_msg", "Houve um erro ao listar as categorias");
+//         res.redirect("/admin")
+//     });
+// });
+
+router.get("/postagens/add", (req, res) => {
+    Categoria.find().lean().then((categorias) => {
+        res.render("admin/addpostagem", {categorias: categorias})
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao carregar o formulário");
+        res.redirect("/admin");
+    })
+    
+})
+
+router.post("/postagens/nova", (req, res) => {
+    var erros = [];
+
+    if(req.body.categoria == "0") {
+        erros.push({texto: "Categoria inválida, registre uma categoria!"});
+    }
+
+    if(erros.length > 0){
+        res.render("admin/addpostagem", {erros: erros})
+    } else {
+        const novaPostagem = {
+            titulo: req.body.titulo,
+            descricao: req.body.descricao,
+            conteudo: req.body.conteudo,
+            categoria: req.body.categoria,
+            slug: req.body.slug
+        }
+
+        new Postagem(novaPostagem).save().then(() => {
+            req.flash("success_msg", "Postagem criada com sucesso!");
+            res.redirect("/admin/postagens");
+        }).catch((err) => {
+            req.flash("error_msg", "Houve um erro durante o salvamento da postagem!");
+            res.redirect("/admin/postagens");
+        })
+
+    }
+
+
+
+
 });
 
 
