@@ -1,3 +1,4 @@
+const e = require('connect-flash');
 const express = require('express');
 const router = express.Router();
 const mongoose = require("mongoose");
@@ -104,10 +105,12 @@ router.post("/categorias/nova", (req, res) => {
 
 
 router.get('/postagens', (req, res) => {
-    Postagem.find().lean().populate('categorias').sort({data: "desc"}).then((postagens) => { // Resolver problema nao lista
+    Postagem.find().lean().sort({date: 'desc'}).then((postagens) => {
+    // Postagem.find().lean().populate('categorias').sort({data: "desc"}).then((postagens) => { // Resolver problema nao lista
         res.render("admin/postagens", {postagens: postagens})
     })
     .catch((err) => {
+        console.log(err)
         req.flash("error_msg", "Houve um erro ao listar as postagens!");
         res.redirect("/admin")
     })

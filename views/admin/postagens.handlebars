@@ -2,8 +2,8 @@
 <hr>
 <a href="/admin/postagens/add"><button class="btn btn-success">Nova postagem</button></a>
 
-{{#each postagens}}
-    <div class="card">
+{{#each postagens }}
+    <div class="card mt-3">
         <div class="card-body">
             <h4>{{titulo}}</h4>
             <p>{{descricao}}</p>
@@ -13,4 +13,4 @@
     </div>
 {{else}}
     <p>Nenhuma postagem registrada!</p>
-{{/else}}
+{{/each}}
