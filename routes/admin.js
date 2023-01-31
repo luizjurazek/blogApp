@@ -15,6 +15,9 @@ router.get('/posts', (req, res) => {
     res.send("Página de posts");
 });
 
+
+// Rotas de categorias
+
 router.get('/categorias/add', (req, res) => {
     res.render("admin/addcategorias");
 });
@@ -103,10 +106,10 @@ router.post("/categorias/nova", (req, res) => {
     };    
 });
 
+// Rotas de postagens
 
 router.get('/postagens', (req, res) => {
-    Postagem.find().lean().sort({date: 'desc'}).then((postagens) => {
-    // Postagem.find().lean().populate('categorias').sort({data: "desc"}).then((postagens) => { // Resolver problema nao lista
+    Postagem.find().lean().populate('categoria').sort({date: 'desc'}).then((postagens) => {
         res.render("admin/postagens", {postagens: postagens})
     })
     .catch((err) => {
@@ -116,15 +119,6 @@ router.get('/postagens', (req, res) => {
     })
     
 })
-
-// router.get('/categorias', (req, res) => {
-//     Categoria.find().lean().sort({date: 'desc'}).then((categorias) => {
-//         res.render("admin/categorias", {categorias: categorias});
-//     }).catch((err) => {
-//         req.flash("error_msg", "Houve um erro ao listar as categorias");
-//         res.redirect("/admin")
-//     });
-// });
 
 router.get("/postagens/add", (req, res) => {
     Categoria.find().lean().then((categorias) => {
@@ -163,12 +157,45 @@ router.post("/postagens/nova", (req, res) => {
         })
 
     }
-
-
-
-
 });
 
+router.get("/postagens/edit/:id", (req, res) => {
+    Postagem.findOne({_id: req.params.id}).lean().then((postagem) => {
 
+        Categoria.find().lean().then((categorias) => {
+            res.render("admin/editpostagens", {categorias: categorias, postagem: postagem});
+        }).catch((err) => {
+            req.flash("error_msg", "Houve um erro ao listar as categorias");
+            res.redirect("/admin/postagens");
+        })
+
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao carregar o formulário de edição")
+        res.redirect("/admin/postagens")
+    })
+})
+
+router.post("/postagens/edit", (req, res) => {
+    Postagem.findOne({_id: req.body.id}).then((postagem) => {
+        postagem.titulo = req.body.titulo;
+        postagem.slug = req.body.slug;
+        postagem.descricao = req.body.descricao;
+        postagem.conteudo = req.body.conteudo;
+        postagem.categoria = req.body.categoria;
+
+        postagem.save().then(() => {
+            req.flash("success_msg", "Postagem editada com sucesso!")
+            res.redirect("/admin/postagens")
+        }).catch((err) => {
+            req.flash("error_msg", "Erro interno!")
+            res.redirect("/admin/postagens")
+        })
+
+    }).catch((err) => {
+        console.log(err)
+        req.flash("error_msg", "Houve um erro ao salvar a edição!")
+        res.redirect("/admin/postagens")
+    })
+})
 
 module.exports = router;
