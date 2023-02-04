@@ -46,7 +46,8 @@ router.post("/registro", (req, res) => {
                 const novoUsuario = new Usuario({
                     nome: req.body.nome,
                     email: req.body.email,
-                    senha: req.body.senha
+                    senha: req.body.senha,
+                    eAdmin: 1
                 })
 
                 bcrypt.genSalt(10, (err, salt) => {
@@ -89,5 +90,13 @@ router.post("/login", (req, res, next) => {
         failureFlash: true
     })(req, res, next)
 })
+
+router.get("/logout", (req, res, next) => {
+    req.logOut(function(err){
+        if(err){ return next(err)}
+        req.flash("success_msg", "Deslogado com sucesso!");
+        res.redirect("/");
+    });
+});
 
 module.exports = router;

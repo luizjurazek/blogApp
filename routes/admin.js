@@ -8,7 +8,7 @@ require("../models/Postagem");
 const Postagem = mongoose.model("postagens");
 const {eAdmin}= require("../helpers/eAdmin");
 
-router.get('/', (req, res) => {
+router.get('/', eAdmin,(req, res) => {
     res.send("Página principal do painel ADM");
 });
 
